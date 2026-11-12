@@ -19,22 +19,20 @@ Argus is an automated Endpoint Detection and Response (EDR) platform combining k
 
 ---
 
-## STAR Framework
-
-### 1. Situation (Operational Challenge)
+## Operational Context & Threat Landscape
 * **High Telemetry Volume**: Enterprise endpoints emit **10,000–50,000 events/hour/host**.
 * **Alert Fatigue**: Conventional heuristic SIEMs suffer from **> 85% false positive rates**.
 * **Excessive Dwell Time**: Industry mean time to identify (MTTI) exceeds **207 days**.
 * **Fast Encryption**: Ransomware encrypts user storage at **> 416 files/second**, rendering manual approval obsolete.
 
-### 2. Task (Engineering Targets)
+## Engineering Specifications & Targets
 * **Detection Latency**: $T_{\text{detect}} \le 1.0\text{ s}$ from kernel event generation.
 * **Malware Recall**: $\ge 85.0\%$ recall on complex attack chains under high class imbalance ($2.49\%$ attack ratio).
 * **Graph Traversal**: In-memory DAG query time $\le 10\text{ ms}$ in $O(V + E)$.
 * **False Positive Reduction**: End-to-end operational FPR $\le 1.5\%$.
 * **Containment Speed**: Autonomous process kill and quarantine isolation in $\le 50\text{ ms}$.
 
-### 3. Action (6-Layer Architecture)
+## 6-Layer Architecture & Implementation
 * **Layer 0 (Autonomous Bouncer)**: Ingests Sysmon Event IDs 1, 11, 12, 13 at 100ms polling. Computes Shannon binary entropy: $\mathcal{H} > 7.5$ (warning), $\mathcal{H} > 7.9$ (packed/encrypted critical alert).
 * **Layer 1 (Graph Engine)**: Builds an in-memory NetworkX Directed Acyclic Graph ($PROCESS$, $FILE$, $REGISTRY$, $NETWORK$) with backward/forward causal walk in $\le 1.8\text{ ms}$.
 * **Layer 2 (Scoring & Decision Fusion)**: Tri-model ensemble:
@@ -46,7 +44,7 @@ Argus is an automated Endpoint Detection and Response (EDR) platform combining k
 * **Layer 4 (Response Engine)**: Terminates attack PID via Win32 API ($11.2\text{ ms}$) and isolates payloads to `C:\ProgramData\ARGUS\quarantine\` with DACL execute-lockout ($7.3\text{ ms}$). Validates against 3-tier SHA-256 whitelist.
 * **Layer 5 (Continuous Learning)**: Human-in-the-loop analyst feedback loop with automated online retraining via APScheduler.
 
-### 4. Results (Empirical Validation)
+## Empirical Benchmark Results
 * **Holdout Test Set (14,193 events)**:
   * Confusion Matrix: $\text{TN} = 9,220$, $\text{TP} = 304$, $\text{FN} = 49$, $\text{FP} = 4,620$ (raw stream detector).
   * Layer 2/3 Fusion eliminated $99.6\%$ of raw FPs, yielding an effective system FPR of **$< 1.4\%$**.
