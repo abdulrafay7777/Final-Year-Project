@@ -1,5 +1,5 @@
 // src/components/whitelist/WhitelistManager.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { whitelistService } from '../../services/whitelistService';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { formatDate } from '../../utils/formatters';
@@ -15,22 +15,22 @@ export default function WhitelistManager() {
   const [newReason, setNewReason] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
-  const fetchWhitelist = async () => {
+  const fetchWhitelist = useCallback(async () => {
     try {
       setLoading(true);
       const data = await whitelistService.getWhitelist(selectedTier);
       setWhitelist(data.whitelist || []);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch whitelist');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTier]);
 
   useEffect(() => {
     fetchWhitelist();
-  }, [selectedTier]);
+  }, [fetchWhitelist]);
 
   const handleAddEntry = async (e) => {
     e.preventDefault();
@@ -62,6 +62,11 @@ export default function WhitelistManager() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 text-xs">
+          {error}
+        </div>
+      )}
       {/* Reputation Bias Form */}
       <div className="bg-slate-900 border border-indigo-500/20 rounded-xl p-5 shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -mr-16 -mt-16"></div>

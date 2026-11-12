@@ -8,8 +8,7 @@ import {
   Activity, 
   Waypoints, 
   Zap, 
-  BrainCircuit,
-  Eye
+  BrainCircuit
 } from 'lucide-react';
 
 export default function Sidebar() {

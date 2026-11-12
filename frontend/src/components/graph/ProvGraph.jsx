@@ -105,12 +105,14 @@ export default function ProvGraph() {
             lastSig = sig;
           }
         } catch (err) {
-          if (!mounted) return;
-          setError(err.message);
+          if (mounted) {
+            setError(err.message);
+          }
         } finally {
-          if (!mounted) return;
-          if (initial) setLoading(false);
-          else setRefreshing(false);
+          if (mounted) {
+            if (initial) setLoading(false);
+            else setRefreshing(false);
+          }
         }
       };
   

@@ -18,6 +18,6 @@ export default function Layer5Dashboard() {
         <RetrainingLog />
       </div>
       <FPRateChart />
-      </div>
+    </div>
   );
 }

@@ -153,7 +153,7 @@ def run_randomized_search(csv_path: str, out_dir: str, n_iter: int = 5, sample_f
 
 if __name__ == '__main__':
     repo = Path(__file__).resolve().parents[3]
-    csv = repo / 'windows_training_data.csv'
+    csv = repo / 'data' / 'windows_training_data.csv' if (repo / 'data' / 'windows_training_data.csv').exists() else repo / 'windows_training_data.csv'
     outdir = repo / 'backend' / 'ml' / 'models'
     if not csv.exists():
         raise SystemExit(f"Missing {csv}")

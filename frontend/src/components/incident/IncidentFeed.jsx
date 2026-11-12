@@ -4,39 +4,23 @@ import IncidentCard from './IncidentCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { incidentService } from '../../services/incidentService';
 
-export default function IncidentFeed({ severity = null, limit = 20, showMalwareToggle = false }) {
+export default function IncidentFeed({ severity = null, limit = 20 }) {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [viewFilter, setViewFilter] = useState('ACTIVE'); // ACTIVE or ALL
+  const [viewFilter] = useState('ACTIVE'); // ACTIVE or ALL
 
   useEffect(() => {
     let mounted = true;
     const fetchIncidents = async (initial = false) => {
       try {
         if (initial) setLoading(true);
-        else setRefreshing(true);
 
-        // ACTIVE = NEW + OPEN with CRITICAL or WARNING severity
-        // ALL = everything
-        let statusFilter = null;
-        let severityFilter = severity;
-        
-        if (viewFilter === 'ACTIVE') {
-          // Don't filter by status (get NEW and OPEN)
-          // But only show CRITICAL and WARNING
-          if (!severity) {
-            severityFilter = null; // Will filter client-side
-          }
-        }
-
-        const data = await incidentService.getIncidents(severityFilter, statusFilter, limit * 2);
+        const data = await incidentService.getIncidents(severity, null, limit * 2);
         if (!mounted) return;
 
         let filteredIncidents = data.incidents || [];
         
-        // Client-side filtering for ACTIVE view
         if (viewFilter === 'ACTIVE') {
           filteredIncidents = filteredIncidents.filter(inc => 
             (inc.status === 'NEW' || inc.status === 'OPEN') &&
@@ -49,12 +33,13 @@ export default function IncidentFeed({ severity = null, limit = 20, showMalwareT
         setIncidents(filteredIncidents);
         setError(null);
       } catch (err) {
-        if (!mounted) return;
-        setError(err.message);
+        if (mounted) {
+          setError(err.message);
+        }
       } finally {
-        if (!mounted) return;
-        if (initial) setLoading(false);
-        else setRefreshing(false);
+        if (mounted && initial) {
+          setLoading(false);
+        }
       }
     };
 
@@ -68,29 +53,31 @@ export default function IncidentFeed({ severity = null, limit = 20, showMalwareT
         const data = JSON.parse(ev.data);
         if (!mounted) return;
         
-        // Apply same filtering logic for SSE updates
         const shouldShow = viewFilter === 'ALL' || 
           ((data.status === 'NEW' || data.status === 'OPEN') &&
            (data.severity === 'CRITICAL' || data.severity === 'WARNING'));
         
         if (shouldShow) {
           setIncidents(prev => {
-            // prepend and dedupe by session_id
             const next = [data, ...prev.filter(i => i.session_id !== data.session_id)];
             return next.slice(0, limit);
           });
         }
       } catch (err) {
-        console.error('SSE parse error', err);
+        console.debug('SSE parse notice', err);
       }
     };
     es.onerror = (err) => {
-      console.warn('SSE connection error', err);
+      console.debug('SSE stream status update', err);
     };
 
     return () => {
       mounted = false;
-      try { es.close(); } catch (e) {}
+      try {
+        es.close();
+      } catch (err) {
+        console.debug('SSE teardown', err);
+      }
     };
   }, [severity, limit, viewFilter]);
 

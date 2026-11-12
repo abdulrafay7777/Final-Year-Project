@@ -67,7 +67,7 @@ def train_final_model(X_train, best_cfg: dict):
 
 def main():
     repo = Path(__file__).resolve().parents[3]
-    csv_path = repo / 'windows_training_data.csv'
+    csv_path = repo / 'data' / 'windows_training_data.csv' if (repo / 'data' / 'windows_training_data.csv').exists() else repo / 'windows_training_data.csv'
     models_dir = repo / 'backend' / 'ml' / 'models'
     config_path = models_dir / 'hyperparam_best_config.json'
     

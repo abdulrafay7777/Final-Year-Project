@@ -83,7 +83,7 @@ export default function D3ProvTree({ seedNodeId, nodes, edges, height = 560, onN
     // links
     const linkGen = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 
-    const links = g.append("g")
+    g.append("g")
       .selectAll("path")
       .data(root.links())
       .join("path")

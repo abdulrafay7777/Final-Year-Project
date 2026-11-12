@@ -76,7 +76,7 @@ echo.
 echo ============================================
 echo RANSOMWARE VARIANT SIMULATION COMPLETE
 echo Expected Alerts:
-echo - Layer 0: HIGH ENTROPY (encrypted files > 7.9)
+echo - Layer 0: HIGH ENTROPY (encrypted files ^> 7.9)
 echo - Layer 2A: SPAWN RATE (12 explorer.exe instances)
 echo - Layer 2A: EDGE BURST (80+ file operations)
 echo - Layer 2B: REGISTRY P-MATRIX (startup folder modification)

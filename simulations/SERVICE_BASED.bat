@@ -118,7 +118,7 @@ echo.
 echo ============================================
 echo SERVICE-BASED MALWARE SIMULATION COMPLETE
 echo Expected Alerts:
-echo - Layer 0: HIGH ENTROPY (service executables, DLLs, SCR files > 7.9)
+echo - Layer 0: HIGH ENTROPY (service executables, DLLs, SCR files ^> 7.9)
 echo - Layer 2A: SPAWN RATE (svchost, rundll32, wmic, regsvr32, mshta)
 echo - Layer 2A: EDGE BURST (mixed CREATE/COPY/RENAME operations)
 echo - Layer 2B: REGISTRY P-MATRIX (services + Run + RunOnce + system hive)

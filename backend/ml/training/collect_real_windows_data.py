@@ -106,7 +106,7 @@ def collect_from_feedback(min_samples: int = 500):
     
     return df
     
-def export_for_training(output_file: str = "windows_training_data.csv"):
+def export_for_training(output_file: str = None):
     df = collect_from_feedback()
     
     # Fallback to telemetry
@@ -119,7 +119,11 @@ def export_for_training(output_file: str = "windows_training_data.csv"):
         print("Run ARGUS for at least 1 week to collect sufficient data")
         return False
     
-    output_file = r"D:\FYP\Argus\windows_training_data.csv"
+    if output_file is None:
+        repo_root = Path(__file__).resolve().parents[3]
+        data_dir = repo_root / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        output_file = str(data_dir / "windows_training_data.csv")
 
     # Save to CSV
     df.to_csv(output_file, index=False)

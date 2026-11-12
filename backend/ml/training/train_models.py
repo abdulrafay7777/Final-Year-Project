@@ -186,7 +186,9 @@ def train_models(X_train, X_test, y_train, y_test, output_dir: str = "backend/ml
 
 def main():
     # Check if real data exists
-    real_data_file = "windows_training_data.csv"
+    real_data_file = os.path.join("data", "windows_training_data.csv")
+    if not os.path.exists(real_data_file):
+        real_data_file = "windows_training_data.csv"
     
     if os.path.exists(real_data_file):
         print(f"\nFound real Windows data: {real_data_file}")

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { incidentService } from '../services/incidentService';
 import D3ProvenanceGraph from '../components/graph/D3ProvenanceGraph';
@@ -14,18 +14,18 @@ export default function IncidentDetail() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('graph');
 
-  const fetchIncident = () => {
+  const fetchIncident = useCallback(() => {
     incidentService.getIncident(sessionId)
       .then(setIncidentData)
       .catch(err => console.error("Fetch Error:", err))
       .finally(() => setLoading(false));
-  };
+  }, [sessionId]);
 
   useEffect(() => {
     fetchIncident();
     const interval = setInterval(fetchIncident, 10000);
     return () => clearInterval(interval);
-  }, [sessionId]);
+  }, [fetchIncident]);
 
   
 

@@ -5,7 +5,9 @@ from pathlib import Path
 def find_repo_root(start: Path) -> Path:
     current = start.resolve()
     for _ in range(6):
-        if (current / 'windows_training_data.csv').exists():
+        if (current / 'data' / 'windows_training_data.csv').exists() or (current / 'windows_training_data.csv').exists():
+            return current
+        if (current / '.git').exists():
             return current
         if current.parent == current:
             break
@@ -13,8 +15,8 @@ def find_repo_root(start: Path) -> Path:
     return start.resolve()
 
 repo_root = find_repo_root(Path(__file__).resolve().parent)
-csv_path = repo_root / 'windows_training_data.csv'
-test_path = repo_root / 'windows_test_data.csv'
+csv_path = repo_root / 'data' / 'windows_training_data.csv' if (repo_root / 'data' / 'windows_training_data.csv').exists() else repo_root / 'windows_training_data.csv'
+test_path = repo_root / 'data' / 'windows_test_data.csv' if (repo_root / 'data' / 'windows_test_data.csv').exists() else repo_root / 'windows_test_data.csv'
 
 print(f"Loading test data from {test_path}")
 test_df = pd.read_csv(test_path)

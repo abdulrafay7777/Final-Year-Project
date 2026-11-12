@@ -1,5 +1,5 @@
 // src/pages/Layer2Dashboard.jsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import apiClient from '../config/api';
 
 function Badge({ decision }) {
@@ -22,20 +22,32 @@ function mono(s) {
   return <span className="font-mono text-xs text-slate-600">{s}</span>;
 }
 
+function getEventTitle(evt) {
+  if (!evt) return 'EVENT';
+  if (evt.kind === 'PROCESS_CREATE') {
+    const parent = (evt.parent_process || '').split('\\').pop();
+    const child = (evt.child_process || '').split('\\').pop();
+    return `${parent} → ${child}`;
+  }
+  if (evt.kind === 'FILE_CREATE') {
+    return `FILE: ${(evt.target_path || '').split('\\').pop()}`;
+  }
+  if (evt.kind === 'REG_SET') {
+    return `REG: ${(evt.reg_target || '').slice(0, 60)}`;
+  }
+  return evt.kind || 'EVENT';
+}
+
 export default function Layer2Dashboard() {
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(null);
-
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [showAll, setShowAll] = useState(false);
-
   const [error, setError] = useState(null);
 
-  const fetchLatest = async (initial = false) => {
+  const fetchLatest = useCallback(async (initial = false) => {
     try {
       if (initial) setLoading(true);
-      else setRefreshing(true);
 
       const resp = await apiClient.get('/layer2/live/latest', { 
         params: { limit: 50, suspicious_only: !showAll } 
@@ -44,40 +56,37 @@ export default function Layer2Dashboard() {
       setItems(data);
       setError(null);
 
-      // Use the callback form to avoid the stale closure bug
+      // Keep selection in sync with fresh data without stale closures
       setSelected((prevSelected) => {
-        // If nothing is selected yet, select the first item
         if (!prevSelected && data.length > 0) {
           return data[0];
         }
-        // If an item is already selected, keep it selected!
-        // We also find the latest version of it in the new data so the right panel stays live.
         if (prevSelected) {
           const freshVersion = data.find(it => it.event?.event_id === prevSelected.event?.event_id);
           return freshVersion || prevSelected;
         }
         return prevSelected;
       });
-      
     } catch (e) {
       setError(e?.message || 'Failed to load live scoring data');
     } finally {
       if (initial) setLoading(false);
-      else setRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    fetchLatest(true);
-    const id = setInterval(() => fetchLatest(false), 2000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAll]);
 
-  const header = useMemo(() => {
-    const count = items.length;
-    return `${count} live events`;
-  }, [items]);
+  useEffect(() => {
+    let mounted = true;
+    const fetchSafe = (initial) => {
+      if (mounted) fetchLatest(initial);
+    };
+
+    fetchSafe(true);
+    const id = setInterval(() => fetchSafe(false), 2000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [fetchLatest]);
 
   if (loading) {
     return (
@@ -109,12 +118,6 @@ export default function Layer2Dashboard() {
               />
               Show all events
             </label>
-            <div className="flex items-center gap-2">
-              <div className="text-xs font-mono text-slate-500">
-                {refreshing ? 'syncing…' : 'live'}
-              </div>
-              <div className={`h-2 w-2 rounded-full ${refreshing ? 'bg-yellow-400' : 'bg-green-500'}`} />
-            </div>
           </div>
         </div>
 
@@ -130,7 +133,6 @@ export default function Layer2Dashboard() {
         <div className="xl:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="text-slate-900 font-semibold">Event Stream</div>
-            <div className="text-xs text-slate-500 font-mono">/api/layer2/live/latest</div>
           </div>
 
           <div className="space-y-2 max-h-[620px] overflow-y-auto pr-1">
@@ -141,26 +143,17 @@ export default function Layer2Dashboard() {
               const a = scores?.A?.score ?? 0;
               const b = scores?.B?.score ?? 0;
               const c = scores?.C?.score ?? 0;
-
-              const title =
-                evt.kind === 'PROCESS_CREATE'
-                  ? `${(evt.parent_process || '').split('\\').pop()} → ${(evt.child_process || '').split('\\').pop()}`
-                  : evt.kind === 'FILE_CREATE'
-                  ? `FILE: ${(evt.target_path || '').split('\\').pop()}`
-                  : evt.kind === 'REG_SET'
-                  ? `REG: ${(evt.reg_target || '').slice(0, 60)}`
-                  : evt.kind || 'EVENT';
+              const title = getEventTitle(evt);
 
               return (
                 <button
                   key={evt.event_id}
                   onClick={() => setSelected(it)}
-                  className={[
-                    "w-full text-left rounded-lg border p-3 transition",
+                  className={`w-full text-left rounded-lg border p-3 transition ${
                     selected?.event?.event_id === evt.event_id
-                      ? "border-slate-400 bg-white shadow-sm ring-1 ring-slate-200"
-                      : "border-slate-200 bg-slate-50 hover:bg-white",
-                  ].join(" ")}
+                      ? 'border-slate-400 bg-white shadow-sm ring-1 ring-slate-200'
+                      : 'border-slate-200 bg-slate-50 hover:bg-white'
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -339,12 +332,6 @@ export default function Layer2Dashboard() {
                 )}
               </div>
 
-              <button
-                onClick={() => fetchLatest(false)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors text-sm font-semibold shadow-sm"
-              >
-                Refresh now
-              </button>
             </div>
           )}
         </div>

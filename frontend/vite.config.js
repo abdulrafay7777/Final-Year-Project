@@ -14,8 +14,6 @@ export default defineConfig({
         target: `http://${BACKEND_HOST}:${BACKEND_PORT}`,
         changeOrigin: true,
         secure: false,
-        configure: (proxy, options) => {
-        }
       }
     }
   }

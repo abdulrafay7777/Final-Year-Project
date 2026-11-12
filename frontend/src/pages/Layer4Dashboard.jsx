@@ -9,12 +9,7 @@ import {
   Loader2, 
   ArrowRight, 
   ShieldAlert, 
-  CheckCircle, 
-  Info, 
-  Database, 
-  AlertTriangle, 
-  Cpu, 
-  Check 
+  CheckCircle 
 } from 'lucide-react';
 
 function TabButton({ active, onClick, icon, title, subtitle }) {
@@ -103,19 +98,6 @@ export default function Layer4Dashboard() {
               <p className="text-slate-500 text-sm font-medium mt-1">
                 Automated threat containment: quarantine whitelist isolation
               </p>
-            </div>
-          </div>
-
-          <div className={`flex flex-col items-end rounded-xl border px-5 py-3 shadow-inner ${policy?.auto_response_enabled ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}>
-            <div className={`text-[10px] font-extrabold tracking-widest uppercase ${policy?.auto_response_enabled ? 'text-red-500' : 'text-emerald-600'}`}>System Mode</div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${policy?.auto_response_enabled ? 'bg-red-400' : 'bg-emerald-400'}`}></span>
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${policy?.auto_response_enabled ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
-              </span>
-              <div className={`text-base font-extrabold tracking-tight ${policy?.auto_response_enabled ? 'text-red-700' : 'text-emerald-800'}`}>
-                {policy?.auto_response_enabled ? 'Active Response' : 'Passive Monitoring'}
-              </div>
             </div>
           </div>
         </div>

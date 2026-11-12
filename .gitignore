@@ -13,6 +13,8 @@ __pycache__/
 env/
 venv/
 ENV/
+.venv/
+.venv*/
 build/
 develop-eggs/
 dist/
@@ -50,7 +52,6 @@ argus_backend.log
 *.swo
 *~
 .DS_Store
-.vscode/settings.json
 
 # Node / React
 node_modules/
@@ -66,7 +67,7 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 
-# Credentials
+# Credentials & secrets
 *.pem
 *.key
 secrets.json
@@ -75,7 +76,6 @@ credentials.json
 # Quarantine & Backups
 quarantine/
 backups/
-C:\ProgramData\ARGUS\
 
 # Testing
 .pytest_cache/
@@ -88,12 +88,10 @@ htmlcov/
 tmp/
 temp/
 
-# Ignore Sysmon executables
+# Sysmon executables and local state
+sysmon/*.exe
 Sysmon.exe
 Sysmon64.exe
 Sysmon64a.exe
-
-# Ignore configuration and local docs
-Eula.txt
-query
-sysmonconfig.xml
+**/.sysmon_last_rid
+.sysmon_last_rid

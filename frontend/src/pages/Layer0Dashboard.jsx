@@ -7,22 +7,25 @@ export default function Layer0Dashboard() {
   const [recentScans, setRecentScans] = useState([]);
   const [loadingScans, setLoadingScans] = useState(true);
 
-  // Fetch recent background scans from kernel telemetry
-  const fetchRecentScans = async () => {
-    try {
-      const response = await apiClient.get('/layer0/recent-analysis?limit=25');
-      setRecentScans(response.data);
-    } catch (err) {
-      console.error('Failed to fetch scans:', err);
-    } finally {
-      setLoadingScans(false);
-    }
-  };
-
   useEffect(() => {
-    fetchRecentScans();
-    const interval = setInterval(fetchRecentScans, 3000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    const fetchScans = async () => {
+      try {
+        const response = await apiClient.get('/layer0/recent-analysis?limit=25');
+        if (mounted) setRecentScans(response.data);
+      } catch (err) {
+        console.error('Failed to fetch scans:', err);
+      } finally {
+        if (mounted) setLoadingScans(false);
+      }
+    };
+
+    fetchScans();
+    const interval = setInterval(fetchScans, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -38,18 +41,8 @@ export default function Layer0Dashboard() {
             at the point of creation without manual intervention.
           </p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-xl border border-emerald-100 uppercase tracking-widest animate-pulse">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-            Kernel Monitoring Active
-          </div>
-          <div className="px-4 py-2 bg-indigo-50 text-indigo-700 text-[10px] font-black rounded-xl border border-indigo-100 uppercase tracking-widest">
-            Auto-Response Enabled
-          </div>
-        </div>
       </div>
           
-      {/* Live Autonomous Stream */}
       <div className="xl:col-span-3">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden h-full flex flex-col">
           <div className="px-8 py-6 bg-white border-b border-slate-100 flex justify-between items-center">
@@ -58,13 +51,7 @@ export default function Layer0Dashboard() {
                 Live Autonomous Stream
               </h3>
               <p className="text-xs text-slate-400 font-medium">Monitoring kernel events at the storage layer</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Sources</p>
-                <p className="text-xs font-bold text-slate-600">Microsoft-Windows-Sysmon</p>
-              </div>
-            </div>
+         </div>
           </div>
           
           <div className="flex-1 overflow-y-auto">

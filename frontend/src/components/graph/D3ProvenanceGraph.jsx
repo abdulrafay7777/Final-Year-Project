@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useCallback } from "react";
 import * as d3 from "d3";
 
 // --- SOC Aesthetics ---
@@ -24,7 +24,6 @@ const ICONS = {
 export default function D3ProvenanceGraph({ nodes, edges, height = 500, onNodeClick, selectedNodeId }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
 
   const graphData = useMemo(() => {
     if (!nodes || nodes.length === 0) return { ns: [], ls: [] };
@@ -60,14 +59,11 @@ export default function D3ProvenanceGraph({ nodes, edges, height = 500, onNodeCl
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
-    const width = containerRef.current.clientWidth || 900;
-    
     const g = svg.append("g");
     const zoom = d3.zoom()
       .scaleExtent([0.1, 3])
       .on("zoom", (e) => {
         g.attr("transform", e.transform);
-        setZoomLevel(e.transform.k);
       });
     svg.call(zoom);
 
@@ -199,7 +195,7 @@ export default function D3ProvenanceGraph({ nodes, edges, height = 500, onNodeCl
     svg.call(zoom.transform, d3.zoomIdentity.translate(50, 0).scale(0.8));
   }, [graphData, height, onNodeClick, selectedNodeId]);
 
-  const focusRoot = () => {
+  const focusRoot = useCallback(() => {
     if (!containerRef.current || !svgRef.current || graphData.ns.length === 0) return;
     const svg = d3.select(svgRef.current);
     const root = graphData.ns.find(n => n.isRoot) || graphData.ns[0];
@@ -211,13 +207,14 @@ export default function D3ProvenanceGraph({ nodes, edges, height = 500, onNodeCl
       .translate(-root.x, -root.y);
       
     svg.transition().duration(750).call(d3.zoom().on("zoom", (e) => d3.select(svgRef.current).select("g").attr("transform", e.transform)).transform, transform);
-  };
+  }, [graphData.ns, height]);
 
   useEffect(() => {
     if (graphData.ns.length > 0) {
-      setTimeout(focusRoot, 100);
+      const timer = setTimeout(focusRoot, 100);
+      return () => clearTimeout(timer);
     }
-  }, [graphData.ns.length]);
+  }, [graphData.ns.length, focusRoot]);
 
   return (
     <div ref={containerRef} className="w-full h-full min-h-[500px] relative bg-[#0f172a] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">

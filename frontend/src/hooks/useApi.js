@@ -7,23 +7,36 @@ export const useApi = (url, options = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const serializedOptions = JSON.stringify(options);
+
   useEffect(() => {
+    let mounted = true;
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.get(url, options);
-        setData(response.data);
-        setError(null);
+        const parsedOptions = serializedOptions ? JSON.parse(serializedOptions) : {};
+        const response = await apiClient.get(url, parsedOptions);
+        if (mounted) {
+          setData(response.data);
+          setError(null);
+        }
       } catch (err) {
-        setError(err.message);
-        setData(null);
+        if (mounted) {
+          setError(err.message || 'API request failed');
+          setData(null);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [url]);
+    return () => {
+      mounted = false;
+    };
+  }, [url, serializedOptions]);
 
   return { data, loading, error };
 };

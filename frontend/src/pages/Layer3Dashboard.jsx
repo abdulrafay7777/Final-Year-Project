@@ -20,11 +20,9 @@ export default function Layer3Dashboard() {
         setStats(data);
         setError(null);
       } catch (err) {
-        if (!mounted) return;
-        setError(err.message);
+        if (mounted) setError(err.message);
       } finally {
-        if (!mounted) return;
-        if (initial) setLoading(false);
+        if (mounted && initial) setLoading(false);
       }
     };
 
@@ -43,6 +41,7 @@ export default function Layer3Dashboard() {
       <div>
         <h1>Correlator</h1>
         <p className="text-gray-600">Group related events into incidents using signals</p>
+        {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
       </div>
 
       {/* Stats */}

@@ -20,11 +20,9 @@ export default function Layer1Dashboard() {
         setStats(data);
         setError(null);
       } catch (err) {
-        if (!mounted) return;
-        setError(err.message);
+        if (mounted) setError(err.message);
       } finally {
-        if (!mounted) return;
-        if (initial) setLoading(false);
+        if (mounted && initial) setLoading(false);
       }
     };
 

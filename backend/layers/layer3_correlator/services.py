@@ -339,7 +339,7 @@ class CorrelatorService:
                     payload = IncidentResponse.from_orm(incident).dict()
                     broadcaster.notify_incident(payload)
                 except Exception as e:
-                    logger.debug(f"📡 SSE notify failed: {e}")
+                    logger.debug(f"  SSE notify failed: {e}")
             
             return incident
 

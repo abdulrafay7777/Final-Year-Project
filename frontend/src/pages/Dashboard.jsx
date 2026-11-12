@@ -17,7 +17,6 @@ export default function Dashboard() {
   const [learningStats, setLearningStats] = useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState(null);
   const [selectedSeverity, setSelectedSeverity] = useState(null);
@@ -65,7 +64,6 @@ export default function Dashboard() {
   const fetchStats = async (initial = false) => {
     try {
       if (initial) setLoading(true);
-      else setRefreshing(true);
 
       const [incidentStats, learningData] = await Promise.all([
         incidentService.getStats(),
@@ -78,7 +76,6 @@ export default function Dashboard() {
       setError(err.message);
     } finally {
       if (initial) setLoading(false);
-      else setRefreshing(false);
     }
   };
 
@@ -97,21 +94,11 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-              ARGUS <span className="text-slate-300 mx-2"></span> Dashboard
+              ARGUS <span className="text-slate-300 mx-2">|</span> Dashboard
             </h1>
             <p className="text-slate-500 text-sm md:text-base font-medium mt-1">
               Provenance Graph Anomaly Detection Live Monitoring
             </p>
-          </div>
-
-          <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-200/60 shadow-inner">
-            <span className="text-xs font-bold tracking-wider text-slate-600 uppercase">
-              {refreshing ? 'Syncing...' : 'Live System'}
-            </span>
-            <span className="relative flex h-3 w-3">
-              {refreshing && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>}
-              <span className={`relative inline-flex rounded-full h-3 w-3 ${refreshing ? 'bg-yellow-500' : 'bg-emerald-500'}`}></span>
-            </span>
           </div>
         </div>
 
@@ -235,7 +222,7 @@ export default function Dashboard() {
 
         {/* Feed Content */}
         <div className="p-6 bg-white">
-          <IncidentFeed severity={selectedSeverity} limit={20} showMalwareToggle={false} />
+          <IncidentFeed severity={selectedSeverity} limit={20} />
         </div>
       </div>
       <div className="flex items-start gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 shadow-sm">

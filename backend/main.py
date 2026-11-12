@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
         from backend.layers.layer3_correlator import broadcaster
         loop = asyncio.get_event_loop()
         broadcaster.set_event_loop(loop)
-        logger.info("📡 SSE: Event loop registered for incident broadcasting")
+        logger.info("  SSE: Event loop registered for incident broadcasting")
         
         logger.info("ML models: Disabled (using rule-based auto-scoring for speed)")
         app.state.ml_loader = None
